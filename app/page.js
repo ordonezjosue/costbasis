@@ -10,6 +10,9 @@ export default function Home() {
   const [result, setResult] = useState(null);
   const [currentPrice, setCurrentPrice] = useState("");
 
+  // -----------------------------
+  // FILE UPLOAD HANDLER
+  // -----------------------------
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -24,6 +27,7 @@ export default function Home() {
         const uniqueTickers = [
           ...new Set(data.map((row) => row.Symbol).filter(Boolean)),
         ];
+
         setTickers(uniqueTickers);
         setSelectedTicker("");
         setResult(null);
@@ -31,10 +35,13 @@ export default function Home() {
     });
   };
 
+  // -----------------------------
+  // COST BASIS CALC LOGIC
+  // -----------------------------
   const calculateCostBasis = () => {
     if (!selectedTicker || !currentPrice) return;
 
-    // Only rows for this ticker & FILLED trades
+    // Only count FILLED rows for this ticker
     const rows = csvData.filter(
       (r) =>
         r.Symbol === selectedTicker &&
@@ -57,28 +64,23 @@ export default function Home() {
       const isCredit = priceStr.toLowerCase().includes("cr");
       const isDebit = priceStr.toLowerCase().includes("db");
 
-      // ----- OPTION LOGIC -----
+      // OPTION TRADES
       if (desc.includes("call") || desc.includes("put")) {
-        // treat each row as net for that option leg/roll
-        if (!isCredit && !isDebit) return; // safety
-
+        if (!isCredit && !isDebit) return;
         const cash = value * 100 * (isCredit ? 1 : -1);
         optionPremium += cash;
       }
 
-      // ----- STOCK LOGIC (100 BTO only) -----
+      // STOCK TRADES: 100 BTO ONLY
       if (desc.includes("100 bto")) {
         shares += 100;
         stockCost += value * 100;
       }
-      // If you ever want to handle 100 STO (shares called away),
-      // we can extend this later.
     });
 
     if (shares === 0) {
       setResult({
-        error:
-          "No 100 BTO stock rows detected for this ticker with Status = Filled.",
+        error: "No stock purchases (100 BTO) detected for this ticker.",
       });
       return;
     }
@@ -101,16 +103,24 @@ export default function Home() {
     });
   };
 
+  // -----------------------------
+  // UI RENDER
+  // -----------------------------
   return (
     <main className="flex flex-col items-center mt-12 px-4 text-matrixGreen">
-      <h1 className="text-3xl font-bold mb-4 tracking-widest">
+
+      <h1 className="text-3xl font-bold mb-6 tracking-widest">
         COST BASIS MATRIX TOOL
       </h1>
 
-      <input type="file" accept=".csv" onChange={handleFileUpload} />
+      {/* CSV UPLOAD */}
+      <input type="file" accept=".csv" onChange={handleFileUpload}
+        className="mb-6"
+      />
 
+      {/* TICKER SELECT */}
       {tickers.length > 0 && (
-        <div className="mt-6">
+        <div className="mt-4">
           <label>Select Ticker:</label>
           <select
             className="bg-black border border-matrixGreen ml-2 p-2"
@@ -127,8 +137,9 @@ export default function Home() {
         </div>
       )}
 
+      {/* CURRENT PRICE INPUT */}
       {selectedTicker && (
-        <div className="mt-6">
+        <div className="mt-4">
           <label>Current Price ($): </label>
           <input
             className="bg-black border border-matrixGreen ml-2 p-2"
@@ -140,29 +151,62 @@ export default function Home() {
         </div>
       )}
 
+      {/* CALCULATE BTN */}
       <button
         onClick={calculateCostBasis}
-        className="mt-6 border border-matrixGreen px-6 py-3 hover:bg-matrixGreen hover:text-black"
+        className="mt-6 border border-matrixGreen px-6 py-3 hover:bg-matrixGreen hover:text-black text-matrixGreen font-mono rounded-md shadow-[0_0_10px_#00ff41]"
       >
         CALCULATE
       </button>
 
+      {/* RESULTS PANEL */}
       {result && !result.error && (
-        <div className="mt-8 text-left w-full max-w-xl border-t border-matrixGreen pt-6">
-          <h2 className="text-2xl mb-4">Results for {selectedTicker}</h2>
-          <p>Shares Held: {result.shares}</p>
-          <p>Total Stock Cost: ${result.stockCost.toFixed(2)}</p>
-          <p>Net Option Premium: ${result.optionPremium.toFixed(2)}</p>
-          <p>Adjusted Total Cost Basis: ${result.adjustedTotal.toFixed(2)}</p>
-          <p>
-            Adjusted Cost Basis Per Share: $
-            {result.adjustedPerShare.toFixed(2)}
-          </p>
-          <p>
-            Unrealized P/L Per Share: $
-            {result.unrealizedPerShare.toFixed(2)}
-          </p>
-          <p>Total Unrealized P/L: ${result.totalPL.toFixed(2)}</p>
+        <div className="mt-10 w-full max-w-xl flex flex-col items-start gap-4">
+
+          <div className="w-full bg-black/70 border border-matrixGreen p-6 rounded-md shadow-[0_0_15px_#00ff41] text-matrixGreen font-mono whitespace-pre-line">
+
+            <h2 className="text-2xl mb-4 underline underline-offset-4 text-matrixGreen">
+              Results for {selectedTicker}
+            </h2>
+
+            <p>Shares Held: {result.shares}</p>
+            <p>Total Stock Cost: ${result.stockCost.toFixed(2)}</p>
+            <p>Net Option Premium: ${result.optionPremium.toFixed(2)}</p>
+            <p>Adjusted Total Cost Basis: ${result.adjustedTotal.toFixed(2)}</p>
+            <p>
+              Adjusted Cost Basis Per Share: $
+              {result.adjustedPerShare.toFixed(2)}
+            </p>
+            <p>
+              Unrealized P/L Per Share: $
+              {result.unrealizedPerShare.toFixed(2)}
+            </p>
+            <p>Total Unrealized P/L: ${result.totalPL.toFixed(2)}</p>
+          </div>
+
+          {/* COPY BUTTON */}
+          <button
+            onClick={() => {
+              const text = `
+Results for ${selectedTicker}
+
+Shares Held: ${result.shares}
+Total Stock Cost: $${result.stockCost.toFixed(2)}
+Net Option Premium: $${result.optionPremium.toFixed(2)}
+Adjusted Total Cost Basis: $${result.adjustedTotal.toFixed(2)}
+Adjusted Cost Basis Per Share: $${result.adjustedPerShare.toFixed(2)}
+Unrealized P/L Per Share: $${result.unrealizedPerShare.toFixed(2)}
+Total Unrealized P/L: $${result.totalPL.toFixed(2)}
+              `.trim();
+
+              navigator.clipboard.writeText(text);
+              alert("Results copied to clipboard!");
+            }}
+            className="border border-matrixGreen px-6 py-3 hover:bg-matrixGreen hover:text-black text-matrixGreen font-mono rounded-md shadow-[0_0_10px_#00ff41]"
+          >
+            COPY RESULTS
+          </button>
+
         </div>
       )}
 
