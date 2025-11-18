@@ -1,1 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* MATRIX BACKGROUND */
+body {
+  background-color: #000000;
+  color: #00ff41;
+  font-family: 'Courier New', monospace;
+}
+
+/* File upload styling */
+input[type="file"] {
+  color: #00ff41;
+  border: 1px solid #00ff41;
+  padding: 8px;
+  margin-top: 12px;
+  cursor: pointer;
+}
 
