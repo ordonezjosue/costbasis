@@ -10,7 +10,6 @@ export default function Home() {
   const [result, setResult] = useState(null);
   const [currentPrice, setCurrentPrice] = useState("");
   const [displayText, setDisplayText] = useState("");
-  const [showInfo, setShowInfo] = useState(false);
 
   // TYPEWRITER EFFECT
   const typeText = (text) => {
@@ -21,13 +20,11 @@ export default function Home() {
     const typer = setInterval(() => {
       setDisplayText((prev) => prev + text.charAt(i));
       i++;
-      if (i >= text.length) {
-        clearInterval(typer);
-      }
+      if (i >= text.length) clearInterval(typer);
     }, speed);
   };
 
-  // FILE UPLOADER
+  // FILE UPLOAD
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -43,6 +40,7 @@ export default function Home() {
         const uniqueTickers = [
           ...new Set(data.map((row) => row.Symbol).filter(Boolean)),
         ];
+
         setTickers(uniqueTickers);
       },
     });
@@ -86,8 +84,8 @@ export default function Home() {
 
     const adjustedTotal = stockCost - optionPremium;
     const adjustedPerShare = adjustedTotal / shares;
-    const cp = Number(currentPrice);
 
+    const cp = Number(currentPrice);
     const unrealized = cp - adjustedPerShare;
     const totalPL = unrealized * shares;
 
@@ -117,137 +115,150 @@ Total Unrealized P/L: $${totalPL.toFixed(2)}
     typeText(resultText);
   };
 
-  // UI
   return (
-    <main className="flex flex-col items-center mt-12 px-4 text-matrixGreen">
+    <main className="flex flex-col items-center mt-12 px-4 text-matrixGreen w-full">
 
-      {/* HEADER */}
-      <h1 className="text-3xl font-bold mb-6 tracking-widest">
+      {/* PAGE TITLE */}
+      <h1 className="text-3xl font-bold mb-12 tracking-widest">
         COST BASIS MATRIX TOOL
       </h1>
 
-      {/* CSV UPLOADER */}
-      <input type="file" accept=".csv" onChange={handleFileUpload} className="mb-4" />
+      {/* MAIN GRID */}
+      <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-2 gap-10">
 
-      {/* LOGIN BUTTON */}
-      <a
-        href="https://my.tastytrade.com/login.html"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="mb-4 border border-matrixGreen px-6 py-3 hover:bg-matrixGreen hover:text-black text-matrixGreen font-mono rounded-md shadow-[0_0_10px_#00ff41]"
-      >
-        LOGIN TO TASTYTRADE
-      </a>
+        {/* LEFT COLUMN — INFO PANEL */}
+        <div className="bg-black/70 border border-matrixGreen p-6 rounded-md shadow-[0_0_15px_#00ff41] font-mono leading-relaxed">
 
-      {/* INFO PANEL TOGGLE */}
-      <button
-        onClick={() => setShowInfo(!showInfo)}
-        className="mb-6 border border-matrixGreen px-6 py-2 text-matrixGreen hover:bg-matrixGreen hover:text-black font-mono rounded-md shadow-[0_0_10px_#00ff41]"
-      >
-        {showInfo ? "HIDE INFO" : "HOW TO USE THIS TOOL"}
-      </button>
+          <h2 className="text-2xl underline mb-4 text-matrixGreen">
+            About This Tool
+          </h2>
 
-      {/* INFO PANEL */}
-      {showInfo && (
-        <div className="w-full max-w-2xl bg-black/70 p-6 border border-matrixGreen rounded-md shadow-[0_0_15px_#00ff41] font-mono mb-10 leading-relaxed whitespace-pre-line">
-          <h2 className="text-xl underline mb-4 text-matrixGreen">About This Tool</h2>
-          <p>
-            This Matrix-style calculator reads your Tastytrade CSV export and computes:
-            • Net option premium collected (credits – debits)
-            • Total stock cost from 100-share BTO fills
-            • Adjusted cost basis per share
-            • Unrealized P/L based on your current price input
-            • Total Wheel premium income
-
-            It is designed for Wheel traders and Covered Call sellers who want a fast,
-            accurate way to calculate cost basis after rolling, selling premium,
-            adjusting strikes, or accumulating shares.
-
-            Why log in to Tastytrade?
-            • To download your most recent CSV Activity Report
-            • To verify your trade history
-            • To confirm your filled credits/debits and 100-share stock purchases
-
-            How to use this tool:
-            1. Log in to Tastytrade → Download Activity CSV (All Fills)
-            2. Upload the CSV using the Choose File button
-            3. Select your ticker (IBIT, MARA, SOFI, etc.)
-            4. Enter the current stock price
-            5. Hit CALCULATE
-
-            What this accomplishes:
-            • Shows your REAL cost basis after all premium sold
-            • Helps you choose your next Covered Call strike
-            • Shows if you’re net positive or negative on a Wheel campaign
-            • Shows your total P/L including premium collected
+          <p className="mb-4">
+            This Matrix-style calculator analyzes your Tastytrade CSV export and computes:
           </p>
-        </div>
-      )}
 
-      {/* TICKER SELECT */}
-      {tickers.length > 0 && (
-        <div className="mt-2">
-          <label>Select Ticker:</label>
-          <select
-            className="bg-black border border-matrixGreen ml-2 p-2"
-            value={selectedTicker}
-            onChange={(e) => setSelectedTicker(e.target.value)}
-          >
-            <option value="">-- Select --</option>
-            {tickers.map((t) => (
-              <option key={t} value={t}>{t}</option>
-            ))}
-          </select>
-        </div>
-      )}
+          <ul className="list-disc ml-6 mb-4 space-y-2">
+            <li>Net option premium collected (credits – debits)</li>
+            <li>Total stock cost from 100-share BTO fills</li>
+            <li>Adjusted cost basis per share</li>
+            <li>Unrealized P/L based on your entered price</li>
+            <li>Total premium earned from Wheel trading</li>
+          </ul>
 
-      {/* CURRENT PRICE INPUT */}
-      {selectedTicker && (
-        <div className="mt-4">
-          <label>Current Price ($):</label>
+          <h3 className="text-xl underline mb-2">Why Log In to TastyTrade?</h3>
+          <ul className="list-disc ml-6 mb-4 space-y-2">
+            <li>Download your latest CSV activity file</li>
+            <li>Verify all option credits/debits</li>
+            <li>Confirm 100-share stock purchases</li>
+          </ul>
+
+          <h3 className="text-xl underline mb-2">How To Use This Tool</h3>
+          <ol className="list-decimal ml-6 mb-4 space-y-2">
+            <li>Log in to Tastytrade → Download Activity CSV</li>
+            <li>Upload the CSV using the file chooser</li>
+            <li>Select your ticker (IBIT, MARA, SOFI, etc.)</li>
+            <li>Enter the current stock price</li>
+            <li>Click CALCULATE</li>
+          </ol>
+
+          <h3 className="text-xl underline mb-2">What This Tool Helps You Do</h3>
+          <ul className="list-disc ml-6 space-y-2">
+            <li>See your REAL cost basis after all premium sold</li>
+            <li>Choose your next Covered Call strike</li>
+            <li>Understand Wheel profitability instantly</li>
+            <li>Know if your account is net positive or negative</li>
+          </ul>
+
+        </div>
+
+        {/* RIGHT COLUMN — TOOL */}
+        <div className="flex flex-col items-center">
+
+          {/* FILE UPLOAD */}
           <input
-            type="number"
-            step="0.01"
-            className="bg-black border border-matrixGreen ml-2 p-2"
-            value={currentPrice}
-            onChange={(e) => setCurrentPrice(e.target.value)}
+            type="file"
+            accept=".csv"
+            onChange={handleFileUpload}
+            className="mb-4"
           />
-        </div>
-      )}
 
-      {/* CALCULATE BUTTON */}
-      <button
-        onClick={calculateCostBasis}
-        className="mt-6 border border-matrixGreen px-6 py-3 hover:bg-matrixGreen hover:text-black text-matrixGreen font-mono rounded-md shadow-[0_0_10px_#00ff41]"
-      >
-        CALCULATE
-      </button>
-
-      {/* RESULTS PANEL */}
-      {result && (
-        <div className="mt-10 w-full max-w-xl flex flex-col items-start gap-4">
-
-          <div className="w-full bg-black/70 border border-matrixGreen p-6 rounded-md shadow-[0_0_15px_#00ff41] font-mono">
-            <h2 className="text-2xl mb-4 underline text-matrixGreen">Results for {selectedTicker}</h2>
-
-            <div className="typing text-md whitespace-pre-line">
-              {displayText}
-            </div>
-          </div>
-
-          {/* COPY BUTTON */}
-          <button
-            onClick={() => {
-              navigator.clipboard.writeText(result.rawText);
-              alert("Results copied to clipboard!");
-            }}
-            className="border border-matrixGreen px-6 py-3 hover:bg-matrixGreen hover:text-black text-matrixGreen font-mono rounded-md shadow-[0_0_10px_#00ff41]"
+          {/* LOGIN BUTTON */}
+          <a
+            href="https://my.tastytrade.com/login.html"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mb-6 border border-matrixGreen px-6 py-3 hover:bg-matrixGreen hover:text-black text-matrixGreen font-mono rounded-md shadow-[0_0_10px_#00ff41]"
           >
-            COPY RESULTS
+            LOGIN TO TASTYTRADE
+          </a>
+
+          {/* TICKER SELECT */}
+          {tickers.length > 0 && (
+            <div className="mt-2">
+              <label>Select Ticker:</label>
+              <select
+                className="bg-black border border-matrixGreen ml-2 p-2"
+                value={selectedTicker}
+                onChange={(e) => setSelectedTicker(e.target.value)}
+              >
+                <option value="">-- Select --</option>
+                {tickers.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* CURRENT PRICE */}
+          {selectedTicker && (
+            <div className="mt-4">
+              <label>Current Price ($):</label>
+              <input
+                type="number"
+                step="0.01"
+                className="bg-black border border-matrixGreen ml-2 p-2"
+                value={currentPrice}
+                onChange={(e) => setCurrentPrice(e.target.value)}
+              />
+            </div>
+          )}
+
+          {/* CALCULATE BUTTON */}
+          <button
+            onClick={calculateCostBasis}
+            className="mt-6 border border-matrixGreen px-6 py-3 hover:bg-matrixGreen hover:text-black text-matrixGreen font-mono rounded-md shadow-[0_0_10px_#00ff41]"
+          >
+            CALCULATE
           </button>
 
+          {/* RESULTS */}
+          {result && (
+            <div className="mt-10 w-full bg-black/70 border border-matrixGreen p-6 rounded-md shadow-[0_0_15px_#00ff41] font-mono">
+
+              <h2 className="text-2xl mb-4 underline text-matrixGreen">
+                Results for {selectedTicker}
+              </h2>
+
+              <div className="typing whitespace-pre-line text-md">
+                {displayText}
+              </div>
+
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(result.rawText);
+                  alert("Results copied to clipboard!");
+                }}
+                className="mt-6 border border-matrixGreen px-6 py-3 hover:bg-matrixGreen hover:text-black text-matrixGreen font-mono rounded-md shadow-[0_0_10px_#00ff41]"
+              >
+                COPY RESULTS
+              </button>
+            </div>
+          )}
+
         </div>
-      )}
+      </div>
     </main>
   );
 }
