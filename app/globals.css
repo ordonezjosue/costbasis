@@ -2,29 +2,32 @@
 @tailwind components;
 @tailwind utilities;
 
-/* MATRIX FONT & COLORS */
+/* Make whole page black so canvas + content sit on it */
+html,
 body {
   margin: 0;
   padding: 0;
+  background-color: #000000;
   color: #00ff41;
-  background: transparent; /* Canvas shows through */
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
-/* Inputs & Buttons */
-input, select, button {
+/* Inputs & buttons */
+input,
+select,
+button {
   color: #00ff41;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.8);
   border: 1px solid #00ff41;
 }
 
 /* Button hover */
 button:hover {
   background: #00ff41 !important;
-  color: black !important;
+  color: #000000 !important;
 }
 
-/* Smooth animations */
+/* Smooth transitions */
 * {
   transition: all 0.2s ease-in-out;
 }
