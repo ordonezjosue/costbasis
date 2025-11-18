@@ -144,7 +144,7 @@ Total Unrealized P/L: $${totalPL.toFixed(2)}
         onClick={() => setShowInfo(!showInfo)}
         className="mb-6 border border-matrixGreen px-6 py-2 text-matrixGreen hover:bg-matrixGreen hover:text-black font-mono rounded-md shadow-[0_0_10px_#00ff41]"
       >
-        {showInfo ? "HIDE INFO" : "SHOW INFO"}
+        {showInfo ? "HIDE INFO" : "HOW TO USE THIS TOOL"}
       </button>
 
       {/* INFO PANEL */}
